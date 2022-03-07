@@ -26,6 +26,12 @@ class Salle
         $this->cours = new ArrayCollection();
     }
 
+    public function __toString()
+    {
+        return sprintf('%s', $this->numero);
+        
+    }
+
     public function getId(): ?int
     {
         return $this->id;
