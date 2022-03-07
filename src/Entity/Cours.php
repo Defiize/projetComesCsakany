@@ -19,7 +19,7 @@ class Cours
     #[ORM\Column(type: 'datetime')]
     private $dateHeureFin;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[ORM\Column(type: 'string', length: 255, nullable: false)]
     private $type;
 
     #[ORM\ManyToOne(targetEntity: Professeur::class, inversedBy: 'cours')]
