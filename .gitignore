@@ -5,6 +5,7 @@
 /.env.*.local
 /var/cache
 /var
+/var/
 /config/secrets/prod/prod.decrypt.private.php
 /env
 /.env
