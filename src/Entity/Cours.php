@@ -114,4 +114,8 @@ class Cours
 
         return $this;
     }
+    public function __toString()
+    {
+        return sprintf('%s %s (%s) %s', $this->salle, $this->type, $this->professeur, $this->matiere);
+    }
 }

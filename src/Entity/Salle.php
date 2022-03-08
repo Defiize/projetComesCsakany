@@ -82,4 +82,5 @@ class Salle
 
         return $this;
     }
+    
 }

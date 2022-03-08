@@ -14,30 +14,20 @@ class CoursCrudController extends AbstractCrudController
         return Cours::class;
     }
 
-    
+
     public function configureFields(string $pageName): iterable
     {
         return [
-             'dateHeureDebut',
-             'dateHeureFin',
-             AssociationField::new('professeur')
-                ->setFormTypeOptions([
-                    'by_reference' => false,
-                ]),
-                AssociationField::new('matiere')
-                ->setFormTypeOptions([
-                    'by_reference' => false,
-                ]),
-                AssociationField::new('salle')
-                ->setFormTypeOptions([
-                    'by_reference' => false,
-                ]),
-                ChoiceField::new('type')
-                    ->setChoices(fn () => ["TD" => "TD", "TP" => "TP", "Cours" => "Cours"])
-                    ->renderAsNativeWidget()
+            'dateHeureDebut',
+            'dateHeureFin',
+            AssociationField::new('professeur'),
+            AssociationField::new('matiere'),
+            AssociationField::new('salle'),
+            ChoiceField::new('type')
+                ->setChoices(fn () => ["TD" => "TD", "TP" => "TP", "Cours" => "Cours"])
+                ->renderAsNativeWidget()
         ];
     }
-    
 }
 
 // ChoiceField::new('note')
