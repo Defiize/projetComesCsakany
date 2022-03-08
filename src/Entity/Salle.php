@@ -12,7 +12,7 @@ use App\Entity\Cours;
 
 
 #[ORM\Entity(repositoryClass: SalleRepository::class)]
-#[UniqueEntity('numero',message: 'Cette salle existe déja.',)]
+#[UniqueEntity('numero', message: 'Cette salle existe déja.',)]
 class Salle implements \JsonSerializable
 {
     #[ORM\Id]
@@ -20,7 +20,7 @@ class Salle implements \JsonSerializable
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[ORM\Column(type: 'integer',unique:true)]
+    #[ORM\Column(type: 'integer', unique: true)]
     private $numero;
 
     #[ORM\OneToMany(mappedBy: 'salle', targetEntity: Cours::class)]
@@ -34,7 +34,6 @@ class Salle implements \JsonSerializable
     public function __toString()
     {
         return sprintf('%s', $this->numero);
-        
     }
 
     public function getId(): ?int
@@ -85,12 +84,18 @@ class Salle implements \JsonSerializable
     }
     public function jsonSerialize(): mixed
     {
-        // array[]
+        $arrayCours = new ArrayCollection();
+        foreach ($this->cours as $cour) {
+            if ($cour === null) {
+                $arrayCours->add(null);
+            } else {
+                $arrayCours->add(['id' => $cour->getId(), 'type' => $cour->getType()]);
+            }
+        };
         return [
-            'id'=>$this->id,
-            'numero'=>$this->numero,
-            // 'cours'=>foreach($cour in  $this->cours)
+            'id' => $this->id,
+            'numero' => $this->numero,
+            'cours' => $arrayCours->toArray(),
         ];
     }
-    
 }
