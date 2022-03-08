@@ -3,9 +3,13 @@
 namespace App\Entity;
 
 use App\Repository\CoursRepository;
+use App\Validator\EstDateDispo;
+use App\Validator\ProfesseurLibre;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CoursRepository::class)]
+#[EstDateDispo()]
+#[ProfesseurLibre()]
 class Cours
 {
     #[ORM\Id]
