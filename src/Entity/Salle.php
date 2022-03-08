@@ -5,9 +5,13 @@ namespace App\Entity;
 use App\Repository\SalleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 
 #[ORM\Entity(repositoryClass: SalleRepository::class)]
+#[UniqueEntity('numero',message: 'Cette salle existe déja.',)]
 class Salle
 {
     #[ORM\Id]
@@ -15,7 +19,7 @@ class Salle
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(type: 'integer',unique:true)]
     private $numero;
 
     #[ORM\OneToMany(mappedBy: 'salle', targetEntity: Cours::class)]

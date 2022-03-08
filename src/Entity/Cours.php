@@ -31,6 +31,7 @@ class Cours
     private $matiere;
 
     #[ORM\ManyToOne(targetEntity: Salle::class, inversedBy: 'cours')]
+    #[ORM\JoinColumn(nullable: false)]
     private $salle;
 
     public function getId(): ?int
