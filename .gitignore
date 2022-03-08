@@ -8,6 +8,6 @@
 /config/secrets/prod/prod.decrypt.private.php
 /env
 /.env
-./var/
+/var.*
 ./docker-compose.yml
 ###< symfony/framework-bundle ###

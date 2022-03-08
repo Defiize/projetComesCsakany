@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: CoursRepository::class)]
 #[EstDateDispo()]
 #[ProfesseurLibre()]
-class Cours
+class Cours implements \JsonSerializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -117,5 +117,18 @@ class Cours
     public function __toString()
     {
         return sprintf('%s %s (%s) %s', $this->salle, $this->type, $this->professeur, $this->matiere);
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        return [
+            'id'=>$this->id,
+            'dateHeureDebut'=>$this->dateHeureDebut,
+            'dateHeureFin'=>$this->dateHeureFin,
+            'type'=>$this->type,
+            'professeur'=>$this->professeur, 
+            'matiere'=>$this->matiere,
+            'salle'=>$this->salle,
+        ];
     }
 }
