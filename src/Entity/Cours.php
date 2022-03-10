@@ -121,6 +121,7 @@ class Cours implements \JsonSerializable
 
     public function jsonSerialize(): mixed
     {
+
         return [
             'id'=>$this->id,
             'dateHeureDebut'=>$this->dateHeureDebut,
@@ -128,7 +129,7 @@ class Cours implements \JsonSerializable
             'type'=>$this->type,
             'professeur'=>$this->professeur, 
             'matiere'=>$this->matiere,
-            'salle'=>$this->salle,
+            'salle'=>$this->salle
         ];
     }
 }

@@ -25,18 +25,21 @@ return [
                     .')'
                     .'|cours/([^/]++)(?'
                         .'|(*:91)'
-                        .'|/([^/]++)/([^/]++)(*:116)'
+                        .'|/([^/]++)/([^/]++)(?'
+                            .'|(*:119)'
+                            .'|/([^/]++)/([^/]++)/([^/]++)(*:154)'
+                        .')'
                     .')'
                     .'|professeurs/([^/]++)(?'
-                        .'|(*:148)'
+                        .'|(*:187)'
                         .'|/avis(?'
-                            .'|(*:164)'
+                            .'|(*:203)'
                         .')'
                     .')'
                 .')'
                 .'|/professeurs/([^/]++)/(?'
-                    .'|update(*:206)'
-                    .'|delete(*:220)'
+                    .'|update(*:245)'
+                    .'|delete(*:259)'
                 .')'
             .')/?$}sDu',
     ],
@@ -47,14 +50,15 @@ return [
             [['_route' => 'api_avis_edit_avis', '_controller' => 'App\\Controller\\Api\\AvisController::editAvis'], ['id'], ['PATCH' => 0], null, false, true, null],
         ],
         91 => [[['_route' => 'api_cours_name', '_controller' => 'App\\Controller\\Api\\CoursController::show'], ['id'], ['GET' => 0], null, false, true, null]],
-        116 => [[['_route' => 'api_cours_perDay', '_controller' => 'App\\Controller\\Api\\CoursController::showperDay'], ['annee', 'mois', 'jour'], ['GET' => 0], null, false, true, null]],
-        148 => [[['_route' => 'api_professeurs_name', '_controller' => 'App\\Controller\\Api\\ProfesseurController::show'], ['id'], ['GET' => 0], null, false, true, null]],
-        164 => [
+        119 => [[['_route' => 'api_cours_perDay', '_controller' => 'App\\Controller\\Api\\CoursController::showperDay'], ['annee', 'mois', 'jour'], ['GET' => 0], null, false, true, null]],
+        154 => [[['_route' => 'api_cours_between', '_controller' => 'App\\Controller\\Api\\CoursController::showBetweenTwoDate'], ['annee1', 'mois1', 'jour1', 'annee2', 'mois2', 'jour2'], ['GET' => 0], null, false, true, null]],
+        187 => [[['_route' => 'api_professeurs_name', '_controller' => 'App\\Controller\\Api\\ProfesseurController::show'], ['id'], ['GET' => 0], null, false, true, null]],
+        203 => [
             [['_route' => 'api_professeurs_list_avis', '_controller' => 'App\\Controller\\Api\\ProfesseurController::listAvis'], ['id'], ['GET' => 0], null, false, false, null],
             [['_route' => 'api_professeurs_create_avis', '_controller' => 'App\\Controller\\Api\\ProfesseurController::createAvis'], ['id'], ['POST' => 0], null, false, false, null],
         ],
-        206 => [[['_route' => 'professeurs_update', '_controller' => 'App\\Controller\\ProfesseurController::update'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
-        220 => [
+        245 => [[['_route' => 'professeurs_update', '_controller' => 'App\\Controller\\ProfesseurController::update'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        259 => [
             [['_route' => 'professeurs_delete', '_controller' => 'App\\Controller\\ProfesseurController::delete'], ['id'], ['GET' => 0], null, false, false, null],
             [null, null, null, null, false, false, 0],
         ],

@@ -22,7 +22,7 @@
             <v-sheet height="64">
               <v-toolbar flat>
                 <v-btn outlined class="mr-4" color="grey darken-2" @click="setToday">
-                  Today
+                  Aujourd'hui
                 </v-btn>
                 <v-btn fab text small color="grey darken-2" @click="prev">
                   <v-icon small>
@@ -49,16 +49,16 @@
                   </template>
                   <v-list>
                     <v-list-item @click="type = 'day'">
-                      <v-list-item-title>Day</v-list-item-title>
+                      <v-list-item-title>Jours</v-list-item-title>
                     </v-list-item>
                     <v-list-item @click="type = 'week'">
-                      <v-list-item-title>Week</v-list-item-title>
+                      <v-list-item-title>Semaine</v-list-item-title>
                     </v-list-item>
                     <v-list-item @click="type = 'month'">
-                      <v-list-item-title>Month</v-list-item-title>
+                      <v-list-item-title>Mois</v-list-item-title>
                     </v-list-item>
                     <v-list-item @click="type = '4day'">
-                      <v-list-item-title>4 days</v-list-item-title>
+                      <v-list-item-title>4 Jours</v-list-item-title>
                     </v-list-item>
                   </v-list>
                 </v-menu>
@@ -71,23 +71,73 @@
               <v-menu v-model="selectedOpen" :close-on-content-click="false" :activator="selectedElement" offset-x>
                 <v-card color="grey lighten-4" min-width="350px" flat>
                   <v-toolbar :color="selectedEvent.color" dark>
-                    <v-btn icon>
-                      <v-icon>mdi-pencil</v-icon>
-                    </v-btn>
                     <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
                     <v-spacer></v-spacer>
-                    <v-btn icon>
-                      <v-icon>mdi-heart</v-icon>
-                    </v-btn>
-                    <v-btn icon>
-                      <v-icon>mdi-dots-vertical</v-icon>
+                    <v-btn icon  @click="clickLike()">
+                      <v-icon :style="selectedEvent.styleLiked">mdi-heart</v-icon>
                     </v-btn>
                   </v-toolbar>
                   <v-card-text>
                     <span v-html="selectedEvent.details"></span>
+                    <div v-if="!professeurCourant">
+                      <table class="table table-bordered">
+                        <caption>Détails {{selectedEvent.type}}</caption>
+                        <tbody id="tableauDetail">
+                          <tr>
+                            <td>Cours</td>
+                            <td>{{ selectedEvent.titre }}</td>
+                          </tr>
+                          <tr>
+                            <td>Date</td>
+                            <td>{{ selectedEvent.date }}</td>
+                          </tr>
+                          <tr>
+                            <td>Durée</td>
+                            <td>{{ selectedEvent.durée }}</td>
+                          </tr>
+                          <tr>
+                            <td>Enseignant</td>
+                            <td>{{ selectedEvent.professeur?.nom }} {{ selectedEvent.professeur?.prenom }}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div v-if="professeurCourant">
+                      <h2>Laisser un Commentaire à {{professeurCourant.prenom}} {{professeurCourant.nom}}</h2>
+                      <form class="mn-5" v-on:submit.prevent="postAvis()">
+                        <ul class="text-danger">
+                          <li v-for="error in errors">{{error}}</li>
+                        </ul>
+                        <div class="form-group">
+                          <label>Note</label>
+                          <select class="form-control" v-model="nouvelleAvis.note">
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                          </select>
+                        </div>
+                        <div class="form-group">
+                          <label>Commentaire</label>
+                          <textarea class="form-control" required v-model="nouvelleAvis.commentaire"></textarea>
+                        </div>
+                        <div class="form-group">
+                          <label>Adresse email de l'étudiant</label>
+                          <input type="email" class="form-control" required v-model="nouvelleAvis.emailEtudiant">
+                        </div>
+                        <div class="form-group mt-1">
+                          <input type="submit" class="btn btn-primary" value="Ajouter un Avis">
+                        </div>
+                      </form>
+                    </div>
                   </v-card-text>
                   <v-card-actions>
-                    <v-btn text color="secondary" @click="selectedOpen = false">
+                    <v-btn text color="secondary" :disabled="professeurCourant"
+                      v-on:click="selectProfesseur(selectedEvent.professeur)">
+                      Noter le professeur
+                    </v-btn>
+                    <v-btn text color="secondary" @click="selectedOpen = false, professeurCourant = null">
                       Cancel
                     </v-btn>
                   </v-card-actions>
@@ -112,13 +162,18 @@
       vuetify: new Vuetify(),
       data() {
         return {
+          mesLikes: [],
+          nouvelleAvis: {},
+          errors: [],
+          nouvelleAvis: {},
+          professeurCourant: null,
           focus: '',
           type: 'month',
           typeToLabel: {
-            month: 'Month',
-            week: 'Week',
-            day: 'Day',
-            '4day': '4 Days',
+            month: 'Mois',
+            week: 'Semaine',
+            day: 'Jours',
+            '4day': '4 Jours',
           },
           apiBase: 'http://localhost:8800/api',
           selectedEvent: {},
@@ -126,11 +181,16 @@
           selectedOpen: false,
           events: [],
           colors: ['blue', 'indigo', 'deep-purple', 'cyan', 'green', 'orange', 'grey darken-1'],
-          names: ['Meeting', 'Holiday', 'PTO', 'Travel', 'Event', 'Birthday', 'Conference', 'Party'],
         }
       },
       mounted() {
-        this.$refs.calendar.checkChange()
+        this.$refs.calendar.checkChange();
+
+
+      },
+      created() {
+        //localStorage.clear();
+        this.getOldLikes();
       },
       methods: {
         viewDay({ date }) {
@@ -150,9 +210,13 @@
           this.$refs.calendar.next()
         },
         showEvent({ nativeEvent, event }) {
+          this.professeurCourant = null;
+          this.nouvelleAvis = {};
+          this.errors = [];
           const open = () => {
-            this.selectedEvent = event
-            this.selectedElement = nativeEvent.target
+            this.selectedEvent = event;
+            this.selectedElement = nativeEvent.target;
+
             requestAnimationFrame(() => requestAnimationFrame(() => this.selectedOpen = true))
           }
           if (this.selectedOpen) {
@@ -165,36 +229,131 @@
         },
         updateRange({ start, end }) {
           this.events = []
-          const min = new Date(`${start.date}T00:00:00`)
-          const max = new Date(`${end.date}T23:59:59`)
-          axios.get(this.apiBase + '/cours/' + min.getFullYear() + '/' + min.getMonth() + '/' + min.getDay() + '/' + max.getFullYear() + '/' + max.getMonth() + '/' + max.getDay())
+          const min = new Date(start.date)
+          const max = new Date(end.date)
+          axios.get(this.apiBase + '/cours/' + min.getFullYear() + '/' + (min.getMonth() + 1) + '/' + min.getDate() + '/' + max.getFullYear() + '/' + (max.getMonth() + 1) + '/' + max.getDate())
             .then(response => {
-              response.forEach((value, index) => {
-                const startDate = new Date (`${value.dateHeureDebut}`)
-                const finDate = new Date (`${value.dateHeureFin}`)
+              response.data.forEach((value, index) => {
                 this.events.push({
-                  name: value.titre,
-                  start: startDate,
-                  end: finDate,
-                  color: this.colors[this.rnd(0, this.colors.length - 1)],
+                  name: this.makeCourName(value),
+                  start: value.dateHeureDebut.date.slice(0, 16),
+                  end: value.dateHeureFin.date.slice(0, 16),
+                  color: this.makeCourColor(value.type),
                   timed: true,
+                  professeur: value.professeur,
+                  matiere: value.matiere,
+                  salle: value.salle,
+                  titre: value.matiere.titre,
+                  durée: Math.ceil(Math.abs(new Date(value.dateHeureFin.date) - new Date(value.dateHeureDebut.date)) / (1000 * 60 * 60)),
+                  type: value.type,
+                  date: value.dateHeureFin.date.slice(0, 10),
+                  id: value.id,
+                  liked: this.checkLiked(value.id),
+                  styleLiked: (this.checkLiked(value.id)) ? "color:rgb(255, 133, 190); ":"color:rgb(255, 255, 255); ",
                 })
-              })              
+              })
             })
             .catch(error => {
               console.log(error)
             })
+            
         },
-        rnd(a, b) {
-          return Math.floor((b - a + 1) * Math.random()) + a
+        makeCourName(cours) {
+          return (
+            cours.type +
+            " " +
+            cours.matiere.titre +
+            " - Salle : " +
+            cours.salle.numero +
+            " - " +
+            cours.professeur.prenom +
+            " " +
+            cours.professeur.nom
+          );
+        },
+        makeCourColor(type) {
+          switch (type) {
+            case 'Cours':
+              return this.colors[0];
+              break;
+            case 'TD':
+              return this.colors[4];
+              break;
+            case 'TP':
+              return this.colors[5];
+              break;
+            default:
+              return this.colors[6];
+          }
+
+        },
+        selectProfesseur(professeur) {
+          this.professeurCourant = professeur;
+        },
+        postAvis() {
+          this.errors = []
+          axios.post(this.apiBase + '/professeurs/' + this.professeurCourant.id + '/avis', this.nouvelleAvis).then(response => {
+            alert('Votre commentaire à été ajouté')
+            this.removeAvis()
+          }).catch(error => {
+            this.errors = Object.values(error.response.data)
+            console.log(Object.values(error.response.data)[0])
+          })
+
+
+        },
+        removeAvis: function () {
+          this.nouvelleAvis = { note: 0, commentaire: '', emailEtudiant: '' }
+        },
+        clickLike: function () {
+          if(this.selectedEvent.liked){
+            //liked == true (déjà liked donc à délike) retirer un like
+            this.mesLikes.splice(this.mesLikes.indexOf({id: this.selectedEvent.id}), 1);
+            this.selectedEvent.liked = false;
+            this.selectedEvent.styleLiked = "color:rgb(255, 255, 255); ";
+            this.events.forEach((value) => {
+              if (value.id == this.selectedEvent.id) {
+                value.liked = false;
+                value.styleLiked = "color:rgb(255, 255, 255); ";
+              }
+            })
+            localStorage['mesLikes'] = JSON.stringify(this.mesLikes);
+          } else {
+            //liked == false (pas encore liked) ajouter un like
+            this.mesLikes.push({
+              id: this.selectedEvent.id
+            });
+            this.selectedEvent.liked = true;
+            this.selectedEvent.styleLiked = "color:rgb(255, 133, 190); ";
+            
+            this.events.forEach((value) => {
+              if (value.id == this.selectedEvent.id) {
+                value.liked = true;
+                this.selectedEvent.styleLiked = "color:rgb(255, 133, 190); ";
+              }
+            })
+            localStorage['mesLikes'] = JSON.stringify(this.mesLikes);
+          }
+
+        },
+        getOldLikes() {
+          var stored = localStorage.getItem('mesLikes');
+          if (stored) {
+            this.mesLikes = JSON.parse(stored);
+          }
+        },
+        checkLiked: function(id) {
+          var liked = false;
+          this.mesLikes.forEach((value) => {
+            if(value.id == id ){
+              liked = true
+            }
+          })
+          return liked;
         },
       },
-
-
     });
   </script>
-
-
 </body>
 
 </html>

@@ -8,8 +8,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\CoursRepository;
+use DateTime;
 use Symfony\Component\HttpFoundation\Request;
-
+use Symfony\Component\Validator\Constraints\Date;
 
 #[Route('/api/cours', name: 'api_cours_')]
 class CoursController extends AbstractController
@@ -47,21 +48,39 @@ class CoursController extends AbstractController
     }
 
     #[Route('/{annee}/{mois}/{jour}', name: 'perDay', methods:['GET'])]
-    public function showperDay(string $annee, string $mois ,string $jour ,CoursRepository $repository, Request $request): JsonResponse
+    public function showperDay(string $annee, string $mois ,string $jour ,CoursRepository $repository): JsonResponse
     {
         $date = new \DateTime($annee."-".$mois."-".$jour);
         $date = $date->format('Y-m-d');
-        
-        $cours = $repository->createQueryBuilder('cours')
-            ->select("cours.id, cours.dateHeureDebut, cours.dateHeureFin, cours.type, professeur.nom, professeur.prenom, salle.numero, matiere.titre, matiere.reference")
-            ->leftJoin('cours.professeur', 'professeur')
-            ->leftJoin('cours.matiere', 'matiere')
-            ->leftJoin('cours.salle', 'salle')
-            ->where("cours.dateHeureDebut BETWEEN '$date 00:00:00' AND '$date 23:59:59'")
-            ->OrderBy('cours.dateHeureDebut', 'ASC')
-            ->getQuery()
-            ->getResult();
 
+        $cours= $repository->findAll();
+        $index =0;
+        foreach($cours as $cour){
+            if ($cour->getDateHeureDebut()->format('Y-m-d') !== $date){
+                array_splice($cours,$index, 1 );
+            } else{
+                $index = $index +1;
+            }            
+        }
+        return $this->json($cours, 200);
+    }
+
+    #[Route('/{annee1}/{mois1}/{jour1}/{annee2}/{mois2}/{jour2}', name: 'between', methods:['GET'])]
+    public function showBetweenTwoDate(string $annee1, string $mois1 ,string $jour1,string $annee2, string $mois2 ,string $jour2 ,CoursRepository $repository): JsonResponse
+    {
+        $date1 = new \DateTime($annee1."-".$mois1."-".$jour1);
+        $date1 = $date1->format('Y-m-d');
+        $date2 = new \DateTime($annee2."-".$mois2."-".$jour2);
+        $date2 = $date2->format('Y-m-d');        
+        $cours= $repository->findAll();
+        $index =0;
+        foreach($cours as $cour){
+            if (($cour->getDateHeureDebut()->format('Y-m-d') < $date1)||($cour->getDateHeureDebut()->format('Y-m-d') > $date2)){
+                array_splice($cours,$index, 1 );
+            } else {
+                $index = $index +1;
+            }
+        }
         return $this->json($cours, 200);
     }
 
