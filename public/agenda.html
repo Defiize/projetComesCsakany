@@ -99,6 +99,10 @@
                             <td>Enseignant</td>
                             <td>{{ selectedEvent.professeur?.nom }} {{ selectedEvent.professeur?.prenom }}</td>
                           </tr>
+                          <tr>
+                            <td>Nombre de like</td>
+                            <td>{{ selectedEvent.nbLike }}</td>
+                          </tr>
                         </tbody>
                       </table>
                     </div>
@@ -250,6 +254,7 @@
                   id: value.id,
                   liked: this.checkLiked(value.id),
                   styleLiked: (this.checkLiked(value.id)) ? "color:rgb(255, 133, 190); ":"color:rgb(255, 255, 255); ",
+                  nbLike: (value.nbLike) ? value.nbLike: 0,
                 })
               })
             })
@@ -308,28 +313,33 @@
         clickLike: function () {
           if(this.selectedEvent.liked){
             //liked == true (déjà liked donc à délike) retirer un like
+            axios.get(this.apiBase + '/cours/unlike/' + this.selectedEvent.id);
             this.mesLikes.splice(this.mesLikes.indexOf({id: this.selectedEvent.id}), 1);
             this.selectedEvent.liked = false;
             this.selectedEvent.styleLiked = "color:rgb(255, 255, 255); ";
+            this.selectedEvent.nbLike--;
             this.events.forEach((value) => {
               if (value.id == this.selectedEvent.id) {
                 value.liked = false;
                 value.styleLiked = "color:rgb(255, 255, 255); ";
+                //value.nbLike--;
               }
             })
             localStorage['mesLikes'] = JSON.stringify(this.mesLikes);
           } else {
             //liked == false (pas encore liked) ajouter un like
+            axios.get(this.apiBase + '/cours/like/' + this.selectedEvent.id);
             this.mesLikes.push({
               id: this.selectedEvent.id
             });
             this.selectedEvent.liked = true;
             this.selectedEvent.styleLiked = "color:rgb(255, 133, 190); ";
-            
+            this.selectedEvent.nbLike++;
             this.events.forEach((value) => {
               if (value.id == this.selectedEvent.id) {
                 value.liked = true;
-                this.selectedEvent.styleLiked = "color:rgb(255, 133, 190); ";
+                value.styleLiked = "color:rgb(255, 133, 190); ";
+                //value.nbLike++;
               }
             })
             localStorage['mesLikes'] = JSON.stringify(this.mesLikes);

@@ -9,6 +9,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\CoursRepository;
 use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Constraints\Date;
 
@@ -84,4 +86,22 @@ class CoursController extends AbstractController
         return $this->json($cours, 200);
     }
 
+    #[Route('/like/{id}', name: 'addLike', methods:['GET'])]
+    public function addLike(Cours $cours, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $cours->addLike();
+        $entityManager->persist($cours);
+        $entityManager->flush();
+
+        return $this->json($cours, 200);
+    }
+    #[Route('/unlike/{id}', name: 'removeLike', methods:['GET'])]
+    public function removeLike(Cours $cours, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $cours->removeLike();
+        $entityManager->persist($cours);
+        $entityManager->flush();
+        
+        return $this->json($cours, 200);
+    }
 }

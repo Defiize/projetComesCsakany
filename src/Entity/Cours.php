@@ -38,6 +38,14 @@ class Cours implements \JsonSerializable
     #[ORM\JoinColumn(nullable: false)]
     private $salle;
 
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private $nbLike;
+
+    // public function __construct()
+    // {
+    //     $this->nbLike = 0;
+    // }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -46,6 +54,23 @@ class Cours implements \JsonSerializable
     public function getDateHeureDebut(): ?\DateTimeInterface
     {
         return $this->dateHeureDebut;
+    }
+
+    public function addLike(){
+        if(isset($this->nbLike)){
+            $this->nbLike++;
+        }
+        else{
+            $this->nbLike = 1;
+        }
+    }
+    public function removeLike(){
+        if(isset($this->nbLike) && $this->nbLike>0){
+            $this->nbLike--;
+        }
+        else{
+            $this->nbLike = 0;
+        }
     }
 
     public function setDateHeureDebut(\DateTimeInterface $dateHeureDebut): self
@@ -129,7 +154,20 @@ class Cours implements \JsonSerializable
             'type'=>$this->type,
             'professeur'=>$this->professeur, 
             'matiere'=>$this->matiere,
-            'salle'=>$this->salle
+            'salle'=>$this->salle,
+            'nbLike'=>$this->nbLike,
         ];
+    }
+
+    public function getNbLike(): ?int
+    {
+        return $this->nbLike;
+    }
+
+    public function setNbLike(?int $nbLike): self
+    {
+        $this->nbLike = $nbLike;
+
+        return $this;
     }
 }
