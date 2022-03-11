@@ -20,7 +20,8 @@
                             <div class="card-body" :class="{'bg-light': professeur.id === professeurCourant?.id}">
                                 <h5 class="card- title">{{professeur.prenom + ' ' + professeur.nom}}</h5>
                                 <p class="card-text">{{professeur.email}}<br />
-                                    <button class="btn btn-primary" :disabled="professeur.id === professeurCourant?.id" v-on:click="getAvis(professeur)">Afficher les
+                                    <button class="btn btn-primary" :disabled="professeur.id === professeurCourant?.id"
+                                        v-on:click="getAvis(professeur)">Afficher les
                                         Avis cc</button>
                                 </p>
                             </div>
@@ -53,7 +54,7 @@
                         <input type="email" class="form-control" required v-model="nouvelleAvis.emailEtudiant">
                     </div>
                     <div class="form-group mt-1">
-                        <input type="submit" class="btn btn-primary" value="Ajouter un Avis" >
+                        <input type="submit" class="btn btn-primary" value="Ajouter un Avis">
                     </div>
                 </form>
                 <h2>Avis concernant {{professeurCourant.prenom +' '+ professeurCourant.nom}}</h2>
@@ -63,7 +64,8 @@
                         <p class="card-text">
                             <i>Commentaire de {{unAvis.emailEtudiant}}</i> <br />
                             {{unAvis.commentaire}}
-                            <button v-if="mesAvis.includes(unAvis.id)" class="btn btn -danger mt-5" v-on:click="deleteAvis(unAvis)">Supprimer</button>
+                            <button v-if="mesAvis.includes(unAvis.id)" class="btn btn -danger mt-5"
+                                v-on:click="deleteAvis(unAvis)">Supprimer</button>
                         </p>
 
                     </div>
@@ -77,56 +79,75 @@
     <script src="https://unpkg.com/axios"></script>
     <script>
         Vue.createApp({
+            created() {
+                //localStorage.clear();
+                this.checkProfesseurLocalStorage();
+            },
             data() {
                 return {
                     apiBase: 'http://localhost:8800/api',
                     professeurs: [],
                     avis: [],
                     professeurCourant: null,
-                    nouvelleAvis:{},
-                    errors :[],
-                    mesAvis:[],
+                    nouvelleAvis: {},
+                    errors: [],
+                    mesAvis: [],
+                    idFromStorage: null,
                 }
             },
             methods: {
-                deleteAvis:function(avisToDelete){
-                    axios.delete(this.apiBase+ '/avis/' + avisToDelete.id).then(response =>{
+                checkProfesseurLocalStorage() {
+                    var stored = localStorage.getItem('idProfesseur');
+                    if (stored) {
+                        this.idFromStorage = JSON.parse(stored).id;
+                        localStorage.removeItem('idProfesseur');
+                    }
+                },
+                deleteAvis: function (avisToDelete) {
+                    axios.delete(this.apiBase + '/avis/' + avisToDelete.id).then(response => {
                         this.mesAvis.splice(this.mesAvis.indexOf(avisToDelete.id), 1)
                         this.avis.splice(this.avis.indexOf(avisToDelete), 1)
-                    }).catch(error=>{
+                    }).catch(error => {
                         console.log(error)
                     })
                 },
-                postAvis:function(){
-                    this.errors=[]
-                    axios.post(this.apiBase+ '/professeurs/' + this.professeurCourant.id + '/avis', this.nouvelleAvis).then(response =>{
+                postAvis: function () {
+                    this.errors = []
+                    axios.post(this.apiBase + '/professeurs/' + this.professeurCourant.id + '/avis', this.nouvelleAvis).then(response => {
                         alert('Votre commentaire à été ajouté')
                         this.avis.push(response.data)
                         this.removeAvis()
                         this.mesAvis.push(response.data.id)
-                    }).catch(error =>{
-                        this.errors =Object.values(error.response.data)
+                    }).catch(error => {
+                        this.errors = Object.values(error.response.data)
                         console.log(Object.values(error.response.data)[0])
                     })
                 },
-                removeAvis:function(){
-                    this.nouvelleAvis= {note:0, commentaire:'',emailEtudiant:''}
+                removeAvis: function () {
+                    this.nouvelleAvis = { note: 0, commentaire: '', emailEtudiant: '' }
                 },
                 getProfesseurs: function () {
                     axios.get(this.apiBase + '/professeurs').then(response => {
-                        this.professeurs = response.data
+                        this.professeurs = response.data;
+                        if (this.idFromStorage != null) {
+                            this.professeurs.forEach((value) => {
+                                if (this.idFromStorage == value.id) {
+                                    this.getAvis(value);
+                                }
+                            })
+                        }
                     }).catch(error => {
                         console.log(error)
                     })
                 },
                 getAvis: function (professeur) {
-                    this.errors=[]
+                    this.errors = []
                     this.removeAvis()
                     axios.get(this.apiBase + '/professeurs/' + professeur.id + '/avis').then(response => {
                         this.avis = response.data
                         this.professeurCourant = professeur
                     }).catch(error => {
-                       
+
                         console.log(error)
                     })
                 }

@@ -46,7 +46,7 @@ class DashboardController extends AbstractDashboardController
             MenuItem::linkToCrud('Matiere', 'fas fa-book-open', Matiere::class),
             MenuItem::linkToCrud('Avis', 'fas fa-star', Avis::class),
             MenuItem::linkToCrud('Cours', 'far fa-calendar-alt', Cours::class),
-            MenuItem::linkToCrud('Salle', 'al fa-door-open', Salle::class),
+            MenuItem::linkToCrud('Salle', 'fa-regular fa-door-open', Salle::class),
             
         ];
     }
